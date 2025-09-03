@@ -3,6 +3,7 @@ import streamlit as st
 cnx = st.connection("snowflake")
 from snowflake.snowpark.functions import col
 import requests
+import pandas as pd
 
 session = cnx.session()
 
