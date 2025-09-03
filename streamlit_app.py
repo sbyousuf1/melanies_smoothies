@@ -40,10 +40,10 @@ if ingredients_list:
         sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
      my_insert_stmt = """ insert into smoothies.public.order(ingredients) values ('""" + ingredients_string + """','""" + name_on_order+ """')"""
+     st.write(my_insert_stmt)
     #my_insert_stmt = f"""insert into smoothies.public.orders (ingredients, name_on_order)
     #    values ('{ingredients_string.strip()}', '{name_on_order.replace("'", "''")}')"""
 
-      st.write(my_insert_stmt)
     #st.stop()
     
     time_to_insert = st.button('Submit Order')
