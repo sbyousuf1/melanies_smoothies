@@ -5,11 +5,10 @@ from snowflake.snowpark.functions import col
 
 session = cnx.session()
 
-# Write directly to the app (removed duplicates)
+# Write directly to the app
 st.title(":cup_with_straw: Customize your Smoothie! :cup_with_straw:")
 st.write("Choose the fruits you want in your custom Smoothie!")
 
-# Added unique key to text_input
 name_on_order = st.text_input("Name on Smoothie:", key="name_input")
 st.write("The name on your Smoothie will be:", name_on_order)
 
@@ -20,22 +19,23 @@ ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
     fruit_list,
     max_selections=5,
-    key="ingredients_select"  # Added unique key
+    key="ingredients_select"
 )
 
 if ingredients_list:
     ingredients_string = ', '.join(ingredients_list)
     
-    time_to_insert = st.button('Submit Order', key="submit_button")  # Added unique key
+    time_to_insert = st.button('Submit Order', key="submit_button")
     
     if time_to_insert:
-        insert_stmt = """
-        INSERT INTO smoothies.public.orders (ingredients, name_on_order)
-        VALUES (?, ?)
-        """
-        
         try:
-            session.sql(insert_stmt).bind_params(ingredients_string, name_on_order).collect()
+            # Using SQL parameters with proper escaping
+            insert_query = f"""
+            INSERT INTO smoothies.public.orders (ingredients, name_on_order)
+            SELECT '{ingredients_string}', '{name_on_order.replace("'", "''")}'
+            """
+            
+            session.sql(insert_query).collect()
             st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
         except Exception as e:
             st.error(f"Error placing order: {str(e)}")
