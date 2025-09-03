@@ -30,8 +30,9 @@ if ingredients_list:
         ingredients_string += fruit_chosen + ' '
     #st.write(ingredients_string)
   
-    my_insert_stmt = """ insert into smoothies.public.orders (ingredients,name_on_order)
-        values ('""" + ingredients_string + """','"""+name_on_order+"""')"""
+    my_insert_stmt = f"""insert into smoothies.public.orders (ingredients, name_on_order)
+        values ('{ingredients_string.strip()}', '{name_on_order.replace("'", "''")}')"""
+
 
 
 
