@@ -24,35 +24,63 @@ ingredients_list = st.multiselect(
     key="ingredients_select"
 )
 
+# Add nutrition information section
 if ingredients_list:
     st.subheader("Nutrition Information")
     
-    # Create tabs for each selected fruit
-    tabs = st.tabs(ingredients_list)
+    # Calculate total nutrition values
+    total_nutrition = {
+        "carbs": 0,
+        "fat": 0,
+        "protein": 0,
+        "sugar": 0
+    }
+    
+    # Create columns for displaying fruits
+    cols = st.columns(len(ingredients_list))
     
     # Fetch and display nutrition info for each selected fruit
     for idx, fruit in enumerate(ingredients_list):
-        with tabs[idx]:
+        with cols[idx]:
+            st.markdown(f"**{fruit}**")
             try:
-                # Make API call for each fruit
                 response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit.lower()}")
                 if response.status_code == 200:
-                    # Convert JSON response to DataFrame and display
                     nutrition_data = response.json()
-                    nutrition_df = pd.DataFrame([nutrition_data])
-                    st.dataframe(nutrition_df, use_container_width=True)
+                    
+                    # Display individual fruit nutrition
+                    st.markdown(f"🍎 Carbs: {nutrition_data['carbs']}g")
+                    st.markdown(f"🥑 Fat: {nutrition_data['fat']}g")
+                    st.markdown(f"🥩 Protein: {nutrition_data['protein']}g")
+                    st.markdown(f"🍯 Sugar: {nutrition_data['sugar']}g")
+                    
+                    # Add to totals
+                    for key in total_nutrition:
+                        total_nutrition[key] += nutrition_data[key]
                 else:
                     st.warning(f"Could not fetch nutrition data for {fruit}")
             except Exception as e:
-                st.error(f"Error fetching nutrition data for {fruit}: {str(e)}")
+                st.error(f"Error fetching nutrition data for {fruit}")
+    
+    # Display total nutrition
+    st.markdown("---")
+    st.subheader("Total Nutrition Values")
+    total_cols = st.columns(4)
+    with total_cols[0]:
+        st.metric("Total Carbs", f"{total_nutrition['carbs']:.1f}g")
+    with total_cols[1]:
+        st.metric("Total Fat", f"{total_nutrition['fat']:.1f}g")
+    with total_cols[2]:
+        st.metric("Total Protein", f"{total_nutrition['protein']:.1f}g")
+    with total_cols[3]:
+        st.metric("Total Sugar", f"{total_nutrition['sugar']:.1f}g")
 
     ingredients_string = ', '.join(ingredients_list)
     
     time_to_insert = st.button('Submit Order', key="submit_button")
-
+    
     if time_to_insert:
         try:
-            # Using SQL parameters with proper escaping
             insert_query = f"""
             INSERT INTO smoothies.public.orders (ingredients, name_on_order)
             SELECT '{ingredients_string}', '{name_on_order.replace("'", "''")}'
