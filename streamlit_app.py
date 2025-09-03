@@ -24,11 +24,31 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
+    st.subheader("Nutrition Information")
+    
+    # Create tabs for each selected fruit
+    tabs = st.tabs(ingredients_list)
+    
+    # Fetch and display nutrition info for each selected fruit
+    for idx, fruit in enumerate(ingredients_list):
+        with tabs[idx]:
+            try:
+                # Make API call for each fruit
+                response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit.lower()}")
+                if response.status_code == 200:
+                    # Convert JSON response to DataFrame and display
+                    nutrition_data = response.json()
+                    nutrition_df = pd.DataFrame([nutrition_data])
+                    st.dataframe(nutrition_df, use_container_width=True)
+                else:
+                    st.warning(f"Could not fetch nutrition data for {fruit}")
+            except Exception as e:
+                st.error(f"Error fetching nutrition data for {fruit}: {str(e)}")
+
     ingredients_string = ', '.join(ingredients_list)
     
     time_to_insert = st.button('Submit Order', key="submit_button")
-    smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-    sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+
     if time_to_insert:
         try:
             # Using SQL parameters with proper escaping
