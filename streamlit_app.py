@@ -29,8 +29,13 @@ if ingredients_list:
         ingredients_string += fruit_chosen + ' '
     #st.write(ingredients_string)
 
-    my_insert_stmt = """ insert into smoothies.public.orders (ingredients,name_on_order)
-        values ('""" + ingredients_string + """','"""+name_on_order+"""')"""
+    # Using proper SQL string formatting for Snowflake
+    my_insert_stmt = """
+            INSERT INTO smoothies.public.orders (ingredients, name_on_order)
+            SELECT '{0}', '{1}'
+            """.format(
+                ingredients_string.replace("'", "''"),
+                name_on_order.replace("'", "''")
 
     #st.write(my_insert_stmt)
     #st.stop()
